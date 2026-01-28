@@ -72,7 +72,8 @@ const BookList = () => {
                                 by{" "}
                                 <strong>
                                     {highlightText(book.author, authorFilter)}
-                                </strong>
+                                </strong>{" "}
+                                ({book.source})
                             </div>
                             <div className="book-actions">
                                 <span

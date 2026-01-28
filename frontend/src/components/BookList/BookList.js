@@ -4,6 +4,7 @@ import { deleteBook, toggleFavorite } from "../../redux/books/actionCreators";
 import {
     selectTitleFilter,
     selectAuthorFilter,
+    selectOnlyFavoriteFilter,
 } from "../../redux/slices/filterSlice";
 import "./BookList.css";
 
@@ -12,6 +13,7 @@ const BookList = () => {
     const dispatch = useDispatch();
     const titleFilter = useSelector(selectTitleFilter);
     const authorFilter = useSelector(selectAuthorFilter);
+    const onlyFavoriteFilter = useSelector(selectOnlyFavoriteFilter);
 
     const handleDeleteBook = (id) => {
         dispatch(deleteBook(id));
@@ -28,22 +30,44 @@ const BookList = () => {
         const matchesAuthor = book.author
             .toLowerCase()
             .includes(authorFilter.toLowerCase());
-        return matchesTitle && matchesAuthor;
+        const matchesFavorite = onlyFavoriteFilter ? book.isFavorite : true;
+        return matchesTitle && matchesAuthor && matchesFavorite;
     });
+
+    const highlightText = (text, filter) => {
+        if (!filter) return text;
+        const regex = new RegExp(`(${filter})`, "gi");
+        const parts = text.split(regex);
+        return parts.map((part, index) =>
+            regex.test(part) ? (
+                <span
+                    className="highlight"
+                    key={index}
+                >
+                    {part}
+                </span>
+            ) : (
+                part
+            ),
+        );
+    };
 
     return (
         <div className="app-block book-list">
             <h2>Book List</h2>
 
-            {books.lenght === 0 ? (
+            {filteredBook.length === 0 ? (
                 <p>No books available</p>
             ) : (
                 <ul>
                     {filteredBook.map((book, i) => (
                         <li key={book.id}>
                             <div className="book-info">
-                                {++i} {book.title} by{" "}
-                                <strong>{book.author}</strong>
+                                {++i} {highlightText(book.title, titleFilter)}{" "}
+                                by{" "}
+                                <strong>
+                                    {highlightText(book.author, authorFilter)}
+                                </strong>
                             </div>
                             <div className="book-actions">
                                 <span
